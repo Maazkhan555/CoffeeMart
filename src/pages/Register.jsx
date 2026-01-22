@@ -3,8 +3,13 @@ import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import beanImg from "../assets/coffee/be.png";
+import BaseUrl from "../api";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+
+ const navigate=useNavigate()
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,19 +35,24 @@ const Register = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:7000/user/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      // const res = await fetch("http://localhost:7000/user/", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(formData),
+      // });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Registration failed");
+      // const data = await res.json();
 
-      toast.success(data.message || "Registration successful!");
+      const res = await BaseUrl.post("/user/", formData);
+
+      toast.success(res.data.message || "Registration successful!");
       setFormData({ name: "", email: "", password: "", contact: "" });
+      navigate("/login")
+
     } catch (err) {
-      toast.error(err.message || "Something went wrong!");
+      toast.error(
+      err.response?.data?.message || err.message || "Something went wrong!"
+    );
     } finally {
       setLoading(false);
     }

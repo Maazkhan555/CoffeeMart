@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import BaseUrl from "../api"; // ✅ import your axios instance
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,27 +22,22 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const url = 'http://localhost:7000/auth/login';
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    
+      const res = await BaseUrl.post('/auth/login', { email, password });
+      const data = res.data;
 
-      const data = await res.json();
+      // Save token from backend response
+      localStorage.setItem("token", data.accesstoken);
+      localStorage.setItem("user", JSON.stringify(data.user || { email }));
 
-      if (res.ok) {
-        console.log("Server Response:", data); // ✅ Log response
-        alert(`🎉 Login successful!\nWelcome: ${data.name || email}`); // ✅ Alert with message
-        setEmail('');
-        setPassword('');
-        navigate("/"); // ✅ Redirect to home
-      } else {
-        toast.error(data.message || "❌ Invalid credentials");
-      }
+      toast.success("🎉 Login successful!");
+      setEmail("");
+      setPassword("");
+
+      navigate("/alluser"); // ✅ redirect to protected page
     } catch (err) {
-      toast.error("❌ An error occurred. Try again later.");
-      console.error(err);
+      console.error("Login error:", err.response || err.message);
+      toast.error(err.response?.data?.message || "❌ Invalid credentials");
     } finally {
       setLoading(false);
     }

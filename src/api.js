@@ -1,11 +1,18 @@
 import axios from "axios";
 
+const BaseUrl = axios.create({
+  baseURL: "http://localhost:7000",
+});
 
-const BaseUrl=axios({
+// ✅ AUTO ATTACH TOKEN
+BaseUrl.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
 
-baseURL:'http://localhost:7000',
-withCredentials:true
-})
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
+  return config;
+});
 
 export default BaseUrl;
